@@ -67,21 +67,19 @@ RUN dpkg --add-architecture i386 \
     && chmod 755 /opt/steamcmd/steamcmd.sh /opt/steamcmd/linux32/steamcmd /opt/steamcmd/linux32/steamerrorreporter /usr/local/bin/valheim-* \
     && cd "/opt/steamcmd" \
     && ./steamcmd.sh +login anonymous +quit \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
+    && curl -sSL https://umod.io/umod-develop.sh | bash /dev/stdin \
+    && . ~/.profile \
+    && cd /opt/valheim \
+    && umod install valheim --dir="/opt/valheim" -P \
+    && umod update valheim --dir="/opt/valheim" -P \
+    && cd /opt/valheim \
+    && umod new launcher -P
 COPY supervisord.conf /etc/supervisor/supervisord.conf
 
 ENV TZ=Etc/UTC
 VOLUME ["/config", "/opt/valheim"]
 EXPOSE 2456-2458/udp
-WORKDIR /
-#CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
-
-RUN curl -sSL https://umod.io/umod-develop.sh | bash /dev/stdin
-RUN . ~/.profile
 WORKDIR /opt/valheim
-RUN umod install valheim --dir="/opt/valheim" -P \
-    && umod update valheim --dir="/opt/valheim" -P \
-    && cd /opt/valheim \
-    && umod new launcher -P
+#CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 CMD umod launch
-
