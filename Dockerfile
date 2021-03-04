@@ -2,7 +2,7 @@ FROM debian:stable as build-env
 ARG TESTS
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install apt-utils
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential curl python3 python3-pip shellcheck
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential curl python3 python3-pip shellcheck nmap
 WORKDIR /build/busybox
 RUN curl -L -o /tmp/busybox.tar.bz2 https://busybox.net/downloads/busybox-1.32.1.tar.bz2
 RUN tar xjvf /tmp/busybox.tar.bz2 --strip-components=1 -C /build/busybox
@@ -66,20 +66,23 @@ RUN dpkg --add-architecture i386 \
     && chown -R root:root /opt/steamcmd \
     && chmod 755 /opt/steamcmd/steamcmd.sh /opt/steamcmd/linux32/steamcmd /opt/steamcmd/linux32/steamerrorreporter /usr/local/bin/valheim-* \
     && cd "/opt/steamcmd" \
-    && ./steamcmd.sh +login anonymous +quit \
+    #&& ./steamcmd.sh +login anonymous +quit \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && curl -sSL https://umod.io/umod-develop.sh | bash /dev/stdin \
-    && . ~/.profile \
+    && /bin/bash ~/.profile \
     && cd /opt/valheim \
-    && umod install valheim --dir="/opt/valheim" -P \
-    && umod update valheim --dir="/opt/valheim" -P \
-    && cd /opt/valheim \
-    && umod new launcher -P
+    #&& /bin/bash umod install valheim --dir="/opt/valheim" -P \
+    #&& /bin/bash umod update valheim --dir="/opt/valheim" -P \
+    #&& cd /opt/valheim \
+    #&& /bin/bash umod new launcher -P
 COPY supervisord.conf /etc/supervisor/supervisord.conf
+COPY entrypoint.sh /entrypoint.sh
 
 ENV TZ=Etc/UTC
 VOLUME ["/config", "/opt/valheim"]
 EXPOSE 2456-2458/udp
 WORKDIR /opt/valheim
 #CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
-CMD umod launch
+#CMD umod launch
+#CMD ["/bin/bash"]
+CMD ["/bin/bash", "/entrypoint.sh"]
