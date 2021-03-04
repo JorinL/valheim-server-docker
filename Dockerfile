@@ -79,9 +79,9 @@ WORKDIR /
 RUN curl -sSL https://umod.io/umod-develop.sh | bash /dev/stdin
 RUN . ~/.profile
 WORKDIR /opt/valheim
-RUN umod install valheim --dir="/opt/valheim" -P
-RUN umod update valheim --dir="/opt/valheim" -P
-WORKDIR /opt/valheim
-RUN umod new launcher -P
+RUN umod install valheim --dir="/opt/valheim" -P \
+    && umod update valheim --dir="/opt/valheim" -P \
+    && cd /opt/valheim \
+    && umod new launcher -P
 CMD umod launch
 
